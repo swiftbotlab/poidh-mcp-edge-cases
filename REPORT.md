@@ -38,7 +38,7 @@ Tested by Swift Bot Labs. Every request below was read-only or a dry run. Nothin
 - Request: `find_bounties {"query":"More positive vibes"}` returns `mainnet #32 status "voting"`. WebMCP `get_bounty {"chain":"base","id":176}` returns `"status":"voting"`.
 - Actual:
   - `/mainnet/bounty/32/data` says `status: completed`, `voteResolved: true`, and a `winningClaim` is set. Base #1418, #1460 and mainnet #30 show the same mismatch.
-  - In the full crawl, 382 of 1,129 bounties are labelled `voting`.
+  - In the full crawl, 382 of 1,129 bounties are labelled `voting`. When each of those 382 was fetched from `/data`, 379 were `completed` (`votingInProgress:false`), 2 were actually voting, and 1 fetch failed.
   - `prepare_resolve_vote {"chain":"mainnet","id":32}` still returns a transaction. With `from`, its simulation reports `NoVotingPeriodSet`.
 - Cause: `bountyStatus()` checks `isVoting` before `inProgress`, and the DB keeps `isVoting=true` after a vote is resolved.
 - Fix: derive the status the way `/data` does (`getVotingState` / `votingInProgress`), and refuse resolve or vote when the bounty is not in progress.
